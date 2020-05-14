@@ -1,0 +1,438 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all; 
+
+library work;
+use work.chess_objects.all;
+
+entity jie_logic is 
+  port (
+    clock, reset: in std_logic;
+    is_click: in std_logic;
+    click_x: in integer range 0 to JIE_X - 1;
+    click_y: in integer range 0 to JIE_Y - 1;
+    out_exist_array: out exist_list_type;
+    -- out_pieces: out jie_piece_matrix;
+    out_state: out game_state;
+    out_has_select: out std_logic;
+    out_select_x: out integer range 0 to JIE_X - 1;
+    out_select_y: out integer range 0 to JIE_Y - 1;
+    out_player: out std_logic
+  );
+end jie_logic;
+
+architecture arch of jie_logic is
+  signal clk_1k: std_logic := '0';
+  signal div_clk_1k: integer range 0 to 99999 := 0; -- detect every 0.001s
+  signal react_cnt: integer range 1 to 300 := 300;  -- react every 0.3s, will also be used to determine which piece to reset
+  type new_board_t is array(0 to 14) of piece;
+  signal new_board_r: new_board_t;
+  signal new_board_b: new_board_t;
+  signal state: game_state;
+  
+  signal old_click_x: integer range 0 to JIE_X - 1;
+  signal old_click_y: integer range 0 to JIE_Y - 1;
+  signal has_old_click: std_logic := '0';
+  signal cur_player: std_logic := '0';
+  signal inner_pieces: jie_piece_matrix;
+  signal exist_array: exist_list_type;
+
+  signal seed: unsigned(31 downto 0) := "00000001001001011110010110010001"; -- random number generator, seed = 19260817
+  -- it seems that before decalring a constant
+  -- it is required to decalre its type first
+  type init_piece_cnt_t is array(1 to 6) of integer range 0 to 4;
+  -- since the for loop is [], the count should be actual count - 1
+  constant init_piece_cnt: init_piece_cnt_t := (1, 1, 1, 1, 1, 4);
+ 
+  function max(x, y: integer) return integer is 
+  begin
+    if x < y then
+      return y;
+    else 
+      return x;
+    end if;
+  end max;
+
+  function min(x, y: integer) return integer is 
+  begin
+    if x < y then
+      return x;
+    else 
+      return y;
+    end if;
+  end min;
+
+  -- called to determine a close but exist piece
+  -- so the input is in a finite set
+  function loc2type(x: integer range 0 to JIE_X - 1; y: integer range 0 to JIE_Y - 1) return integer is
+  begin
+    if y = 0 or y = 9 then
+      if x = 0 or x = 8 then
+        return 3;
+      elsif x = 1 or x = 7 then
+        return 4;
+      elsif x = 2 or x = 6 then
+        return 2;
+      elsif x = 3 or x = 5 then
+        return 1;
+      else
+        -- assert x = 4
+        return 0;
+      end if;
+    elsif y = 2 or y = 7 then
+      -- assert x = 1 or x = 7
+      return 5;
+    else
+      -- assert y = 3 or y = 6
+      -- assert x = 0/2/4/6/8
+      return 6;
+    end if ;
+  end loc2type;
+
+  -- (ny)(nx) should be a unexist place
+  function valid_move(board: jie_piece_matrix;
+                      color: std_logic;
+                      opened: std_logic;
+                      ty: integer range 0 to 6;
+                      ox, nx: integer range 0 to JIE_X - 1;
+                      oy, ny: integer range 0 to JIE_Y - 1) return boolean is
+    variable block_cnt: integer range 0 to JIE_Y - 2;
+    variable lb: integer range 0 to JIE_Y - 1;
+    variable ub: integer range 0 to JIE_Y - 1;
+  begin
+    if ty = 0 then -- jiang
+      if (ox = nx and ((oy /= 0 and oy - 1 = ny) or (oy /= JIE_Y - 1 and oy + 1 = ny))) or 
+        (oy = ny and ((ox /= 0 and ox - 1 = nx) or (ox /= JIE_X - 1 and ox + 1 = nx))) then
+        if color = '0' then
+          return 3 <= nx and nx <= 5 and 7 <= ny and ny <= 9;
+        else 
+          return 3 <= nx and nx <= 5 and 0 <= ny and ny <= 2;
+        end if;
+      else
+        return false;  
+      end if;
+    elsif ty = 1 then -- shi
+      if opened = '0' then -- confine to tian grid
+        if color = '0' then
+          return nx = 4 and ny = 8;
+        else 
+          return nx = 4 and ny = 1;
+        end if;
+      else
+        return ((ox /= 0 and ox - 1 = nx) or (ox /= JIE_X - 1 and ox + 1 = nx)) and ((oy /= 0 and oy - 1 = ny) or (oy /= JIE_Y - 1 and oy + 1 = ny));
+      end if;
+    elsif ty = 2 then -- xiang
+      return (2 <= ox and 2 <= oy and ox - 2 = nx and oy - 2 = ny and board(oy - 1)(ox - 1).exist = '0') or 
+        (2 <= ox and oy <= JIE_Y - 3 and ox - 2 = nx and oy + 2 = ny and board(oy + 1)(ox - 1).exist = '0') or 
+        (ox <= JIE_X - 3 and oy <= JIE_Y - 3 and ox + 2 = nx and oy + 2 = ny and board(oy + 1)(ox + 1).exist = '0') or 
+        (ox <= JIE_X - 3 and 2 <= oy and ox + 2 = nx and oy - 2 = ny and board(oy - 1)(ox + 1).exist = '0');
+    elsif ty = 3 or ty = 5 then -- ju or pao
+      block_cnt := 0;
+      if ox = nx then
+        lb := min(oy, ny);
+        ub := max(oy, ny);
+        for i in 0 to JIE_Y - 1 loop
+          if lb < i and i < ub and board(i)(nx).exist = '1' then
+            block_cnt := block_cnt + 1;
+          end if;
+        end loop; 
+        return block_cnt = 0;
+      elsif oy = ny then
+        lb := min(ox, nx);
+        ub := max(ox, nx);
+        for i in 0 to JIE_X - 1 loop
+          if lb < i and i < ub and board(ny)(i).exist = '1' then
+            block_cnt := block_cnt + 1;
+          end if;
+        end loop; 
+        return block_cnt = 0;
+      else 
+        return false;
+      end if;
+    elsif ty = 4 then -- ma
+      return (1 <= ox and 2 <= oy and ox - 1 = nx and oy - 2 = ny and board(oy - 1)(ox).exist = '0') or 
+        (2 <= ox and 1 <= oy and ox - 2 = nx and oy - 1 = ny and board(oy)(ox - 1).exist = '0') or 
+        (ox <= JIE_X - 2 and 2 <= oy and ox + 1 = nx and oy - 2 = ny and board(oy - 1)(ox).exist = '0') or 
+        (ox <= JIE_X - 3 and 1 <= oy and ox + 2 = nx and oy - 1 = ny and board(oy)(ox + 1).exist = '0') or 
+        (ox <= JIE_X - 2 and oy <= JIE_Y - 3 and ox + 1 = nx and oy + 2 = ny and board(oy + 1)(ox).exist = '0') or
+        (ox <= JIE_X - 3 and oy <= JIE_Y - 2 and ox + 2 = nx and oy + 1 = ny and board(oy)(ox + 1).exist = '0') or
+        (1 <= ox and oy <= JIE_Y - 3 and ox - 1 = nx and oy + 2 = ny and board(oy + 1)(ox).exist = '0') or
+        (2 <= ox and oy <= JIE_Y - 2 and ox - 2 = nx and oy + 1 = ny and board(oy)(ox - 1).exist = '0');
+    else -- zu
+      -- assert ty = 6
+      if color = '0' then -- red, big -> small
+        if 5 <= oy then
+          return oy - 1 = ny and ox = nx;
+        else
+          return (oy /= 0 and oy - 1 = ny and ox = nx) or (oy = ny and ((ox /= 0 and ox - 1 = nx) or (ox /= JIE_X - 1 and ox + 1 = nx)));
+        end if;
+      else -- black, small -> big
+        if oy <= 4 then
+          return oy + 1 = ny and ox = nx;
+        else
+          return (oy /= JIE_Y - 1 and oy + 1 = ny and ox = nx) or (oy = ny and ((ox /= 0 and ox - 1 = nx) or (ox /= JIE_X - 1 and ox + 1 = nx)));
+        end if;  
+      end if;
+    end if;
+  end valid_move;
+  
+  -- (ny)(nx) should be a exist place
+  function valid_eat(board: jie_piece_matrix;
+                     color: std_logic;
+                     opened: std_logic;
+                     ty: integer range 0 to 6;
+                     ox, nx: integer range 0 to JIE_X - 1;
+                     oy, ny: integer range 0 to JIE_Y - 1) return boolean is
+    variable block_cnt: integer range 0 to JIE_Y - 2;
+    variable lb: integer range 0 to JIE_Y - 1;
+    variable ub: integer range 0 to JIE_Y - 1;
+  begin
+    if ty /= 5 then -- not pao
+      return valid_move(board, color, opened, ty, ox, nx, oy, ny);
+    else
+      block_cnt := 0;
+      if ox = nx then
+        lb := min(oy, ny);
+        ub := max(oy, ny);
+        for i in 0 to JIE_Y - 1 loop
+          if lb < i and i < ub and board(i)(nx).exist = '1' then
+            block_cnt := block_cnt + 1;
+          end if;
+        end loop; 
+        return block_cnt = 1;
+      elsif oy = ny then
+        lb := min(ox, nx);
+        ub := max(ox, nx);
+        for i in 0 to JIE_X - 1 loop
+          if lb < i and i < ub and board(ny)(i).exist = '1' then
+            block_cnt := block_cnt + 1;
+          end if;
+        end loop; 
+        return block_cnt = 1;
+      else 
+        return false;
+      end if;
+    end if;
+  end valid_eat;
+
+begin
+  -- out_pieces <= inner_pieces;
+  out_player <= cur_player;
+  out_exist_array <= exist_array;
+  out_state <= state;
+
+  handle_clk : process(clock)
+  begin
+    if rising_edge(clock) then
+      if div_clk_1k = 99999 then
+        div_clk_1k <= 0;
+        clk_1k <= '1';
+      else 
+        div_clk_1k <= div_clk_1k + 1;
+        clk_1k <= '0';
+      end if;
+    end if;
+  end process; -- handle_clk
+
+  handle_reset_click : process(clk_1k)
+    -- for handle reset
+    variable tmp_piece: piece;
+    variable cur: integer range 0 to 15;
+    variable exist_array_cur: integer range 0 to 31; 
+    variable rnd: integer range 0 to 14;
+    variable loc_seed: unsigned(31 downto 0);
+    -- for handle click
+    variable loc_ox, loc_x: integer range 0 to JIE_X - 1;
+    variable loc_oy, loc_y: integer range 0 to JIE_Y - 1;
+    variable loc_op, loc_p: piece;
+    variable used_type: integer range 0 to 6;
+    variable which_to_reset: integer range 1 to 300;
+  begin
+    if rising_edge(clk_1k) then
+      if react_cnt /= 300 then
+        react_cnt <= react_cnt + 1;
+      end if;
+      if reset = '0' then
+        which_to_reset := react_cnt;
+        if react_cnt = 300 then -- do first step of reset
+          react_cnt <= 1;
+          cur := 0;
+          for i in 1 to 6 loop
+            for j in 0 to init_piece_cnt(i) loop 
+              --                (piece_type, color, opened, exist)
+              new_board_r(cur) <= (i, '0', '0', '1'); 
+              cur := cur + 1;
+            end loop;
+          end loop;
+          cur := 0;
+          for i in 1 to 6 loop
+            for j in 0 to init_piece_cnt(i) loop 
+              --                (piece_type, color, opened, exist)
+              new_board_b(cur) <= (i, '1', '0', '1'); 
+              cur := cur + 1;
+            end loop;
+          end loop;
+          -- should reset all internal states here
+          state <= PLAYING;
+          cur_player <= '0';
+          has_old_click <= '0';
+          out_has_select <= '0';
+        else
+          if 1 <= which_to_reset and which_to_reset <= 14 then -- do every step of reset in one cycle
+            loc_seed := seed;
+            -- shuffle r
+            loc_seed := loc_seed xor shift_left(loc_seed, 13);
+            loc_seed := loc_seed xor shift_right(loc_seed, 17);
+            loc_seed := loc_seed xor shift_left(loc_seed, 5);
+            rnd := to_integer((loc_seed(30 downto 0))) mod (which_to_reset + 1); -- omit high bit
+            -- swap
+            tmp_piece := new_board_r(rnd);
+            new_board_r(rnd) <= new_board_r(which_to_reset);
+            new_board_r(which_to_reset) <= tmp_piece;
+            -- shuffle b
+            loc_seed := loc_seed xor shift_left(loc_seed, 13);
+            loc_seed := loc_seed xor shift_right(loc_seed, 17);
+            loc_seed := loc_seed xor shift_left(loc_seed, 5);
+            rnd := to_integer((loc_seed(30 downto 0))) mod (which_to_reset + 1); -- omit high bit
+            -- swap
+            tmp_piece := new_board_b(rnd);
+            new_board_b(rnd) <= new_board_b(which_to_reset);
+            new_board_b(which_to_reset) <= tmp_piece;
+            seed <= loc_seed;
+          elsif which_to_reset = 15 then
+            cur := 0;
+            exist_array_cur := 0;
+            
+            for i in 0 to JIE_X - 1 loop
+              for j in 0 to JIE_Y - 1 loop
+                inner_pieces(j)(i).exist <= '0';
+              end loop;  
+            end loop;
+
+            for i in 0 to 3 loop
+              inner_pieces(0)(i) <= new_board_b(cur);
+              inner_pieces(9)(i) <= new_board_r(cur);
+              
+              -- (piece_type, color, opened, exist, x, y)
+              exist_array(exist_array_cur) <= (new_board_b(cur).piece_type, '1', '0', '1', i, 0);
+              exist_array_cur := exist_array_cur + 1;
+              exist_array(exist_array_cur) <= (new_board_r(cur).piece_type, '0', '0', '1', i, 9);
+              exist_array_cur := exist_array_cur + 1;
+
+              cur := cur + 1;
+              inner_pieces(0)(8 - i) <= new_board_b(cur);
+              inner_pieces(9)(8 - i) <= new_board_r(cur);
+
+              exist_array(exist_array_cur) <= (new_board_b(cur).piece_type, '1', '0', '1', 8 - i, 0);
+              exist_array_cur := exist_array_cur + 1;
+              exist_array(exist_array_cur) <= (new_board_r(cur).piece_type, '0', '0', '1', 8 - i, 9);
+              exist_array_cur := exist_array_cur + 1;
+              
+              cur := cur + 1;
+            end loop;
+            for i in 0 to 4 loop
+              inner_pieces(3)(2 * i) <= new_board_b(cur);
+              inner_pieces(6)(2 * i) <= new_board_r(cur);
+
+              exist_array(exist_array_cur) <= (new_board_b(cur).piece_type, '1', '0', '1', 2 * i, 3);
+              exist_array_cur := exist_array_cur + 1;
+              exist_array(exist_array_cur) <= (new_board_r(cur).piece_type, '0', '0', '1', 2 * i, 6);
+              exist_array_cur := exist_array_cur + 1;
+
+              cur := cur + 1;
+            end loop;
+            for i in 0 to 1 loop
+              inner_pieces(2)(6 * i + 1) <= new_board_b(cur);
+              inner_pieces(7)(6 * i + 1) <= new_board_r(cur);
+
+              exist_array(exist_array_cur) <= (new_board_b(cur).piece_type, '1', '0', '1', 6 * i + 1, 2);
+              exist_array_cur := exist_array_cur + 1;
+              exist_array(exist_array_cur) <= (new_board_r(cur).piece_type, '0', '0', '1', 6 * i + 1, 7);
+              exist_array_cur := exist_array_cur + 1;
+
+              cur := cur + 1;
+            end loop;
+            -- jiang
+            inner_pieces(0)(4) <= (0, '1', '1', '1');
+            inner_pieces(9)(4) <= (0, '0', '1', '1');
+            exist_array(30) <= (0, '1', '1', '1', 4, 0);
+            exist_array(31) <= (0, '0', '1', '1', 4, 9);
+            
+          end if;
+        end if;
+      elsif is_click = '1' then
+        if react_cnt = 300 then
+          react_cnt <= 1;
+          loc_ox := old_click_x;
+          loc_oy := old_click_y;
+          loc_x := click_x;
+          loc_y := click_y;
+          loc_op := inner_pieces(loc_oy)(loc_ox);
+          loc_p := inner_pieces(loc_y)(loc_x);
+          out_has_select <= '0';
+
+          if state = PLAYING then
+            if has_old_click = '0' then
+              if loc_p.exist = '1' and loc_p.color = cur_player then
+                has_old_click <= '1';
+                old_click_x <= loc_x;
+                old_click_y <= loc_y;
+                out_has_select <= '1';
+                out_select_x <= loc_x;
+                out_select_y <= loc_y;
+              end if;
+            else
+              has_old_click <= '0';
+              
+              -- inner_pieces(loc_y)(loc_x) <= loc_op;
+  
+              if loc_op.opened = '0' then
+                used_type := loc2type(loc_ox, loc_oy);
+              else 
+                used_type := loc_op.piece_type;
+              end if;
+              if loc_p.exist = '1' then
+                if loc_p.color = not cur_player and valid_eat(inner_pieces, loc_op.color, loc_op.opened, used_type, loc_ox, loc_x, loc_oy, loc_y) then
+                  if loc_p.piece_type = 0 then -- jiang
+                    if cur_player = '0' then
+                      state <= RED_WIN;
+                    else
+                      state <= BLACK_WIN;
+                    end if;
+                  end if;
+                  loc_op.opened := '1';
+                  inner_pieces(loc_y)(loc_x) <= loc_op;
+                  inner_pieces(loc_oy)(loc_ox).exist <= '0';
+                  for i in 0 to 31 loop
+                    if exist_array(i).x = loc_ox and exist_array(i).y = loc_oy then
+                      exist_array(i).x <= loc_x;
+                      exist_array(i).y <= loc_y;
+                      exist_array(i).opened <= '1';
+                    elsif exist_array(i).x = loc_x and exist_array(i).y = loc_y then
+                      exist_array(i).exist <= '0';
+                    end if;
+                  end loop; 
+                  cur_player <= not cur_player;
+                end if;
+              else
+                if valid_move(inner_pieces, loc_op.color, loc_op.opened, used_type, loc_ox, loc_x, loc_oy, loc_y) then
+                  loc_op.opened := '1';
+                  inner_pieces(loc_y)(loc_x) <= loc_op;
+                  inner_pieces(loc_oy)(loc_ox).exist <= '0';
+                  for i in 0 to 31 loop
+                    if exist_array(i).x = loc_ox and exist_array(i).y = loc_oy then
+                      exist_array(i).x <= loc_x;
+                      exist_array(i).y <= loc_y;
+                      exist_array(i).opened <= '1';
+                    end if;
+                  end loop;
+                  cur_player <= not cur_player;
+                end if;
+              end if;
+            end if;
+          end if;
+        end if;
+      end if;
+    end if;
+  end process ; -- handle_reset_click
+end arch;

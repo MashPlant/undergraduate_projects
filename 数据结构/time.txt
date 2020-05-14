@@ -1,0 +1,9 @@
+#include <chrono>
+
+using namespace std::chrono;
+
+{
+    auto now = high_resolution_clock::now;
+    auto beg = now();
+    std::cout << duration<double>(now() - beg).count() << std::endl;
+}

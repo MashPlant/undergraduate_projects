@@ -1,0 +1,1 @@
+https://github.com/MashPlant/os_lab_2019
