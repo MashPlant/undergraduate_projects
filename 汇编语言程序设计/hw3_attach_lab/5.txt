@@ -1,0 +1,12 @@
+30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30
+a8 1b 40 00 00 00 00 00 /* getval_232, 48 89 e0 c3, movq %rsp, %rax */
+4e 1b 40 00 00 00 00 00 /* getval_269, 48 89 c7 c3, movq %rax, %rdi */
+48 1b 40 00 00 00 00 00 /* getval_317, 58 90 90 c3, popq %rax nop nop ret */
+48 00 00 00 00 00 00 00 /* offset from 401ba8's %rsp to string */
+f3 1b 40 00 00 00 00 00 /* addval_300, 89 c1 84 c0 c3, movl %eax, %ecx nop ret */
+1d 1c 40 00 00 00 00 00 /* addval_310, 89 ca c3, movl %ecx, %edx ret */
+01 1c 40 00 00 00 00 00 /* addval_206, 89 d6 c3 mov %edx, %esi ret */
+80 1b 40 00 00 00 00 00 /* call add_xy, %rax = %rdi + %rsi */
+4e 1b 40 00 00 00 00 00 /* getval_269, 48 89 c7 c3, movq %rax, %rdi */
+aa 1a 40 00 00 00 00 00
+35 66 31 31 33 32 65 33 00

@@ -1,0 +1,17 @@
+your current programming skills
+会一点C++
+
+projects you have finished
+https://github.com/MashPlant/DataStructure
+花了一整个寒假来写的。可以说是涵盖了大多数常见的数据结构。
+个人感觉是，越写越喜欢C++，感觉别的语言真的没有这样的"自由"，即便是Pyhton。
+既有模板这样的高级特性，即使用不到完整的模板元编程，从其中取出的一点点特性(SFINAE等)也足以让程序非常"神奇"。
+又可以直接接触到底层，各种内存移动，指针操作，从底层提高效率。
+这其中个人感觉写的最成功的两个是vEBTree和BTree，它们分别代表了这两个极端。
+(但是在这个项目中，很少用到了继承和多态，因此这方面的知识还不是很熟练)
+(这个不能算大型项目，因为每个数据结构基本上彼此独立)
+
+competitions you have attended
+null
+honors you have achieved in the past
+null

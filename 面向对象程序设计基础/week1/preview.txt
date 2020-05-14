@@ -1,0 +1,56 @@
+1.What is the difference between new/delete and malloc/free? 
+以下不区分new和new[]
+free和delete的区别基本可以一一对应，省略
+
+表面上:
+malloc返回void*，C语言中可以直接隐式转换为K*，C++中需要显示转换(reinterpret_cast)
+new直接返回K*
+malloc需要指定字节数
+new会自动申请需要的字节数
+new是一个operator，而且可以被重载
+
+内在:
+new申请内存并且执行构造函数
+malloc只申请内存，而且内存的内容没有任何保证(debug下的vs会自动填充0xcdcdcdcd，屯屯屯)
+malloc一定从堆上申请内存，new从自由存储区(free store)上申请内存
+Note that while the default global new and delete might be implemented in terms of malloc and free 
+by a particular compiler, the heap is not the same as free store and memory allocated in one area 
+cannot be safely deallocated in the other.
+如果乐意的话，重载的new完全可以返回栈上的内存或者静态储存区的内存，只要delete对应重载即可
+
+申请失败:
+malloc返回NULL(nullptr)
+默认的new抛出bad_alloc异常，另一个重载版本
+void* operator new  ( std::size_t count, const std::nothrow_t& tag)
+的默认实现返回NULL(nullptr)
+
+其他:
+new的定位版本void* operator new  ( std::size_t count, void* ptr )
+与动态内存没有任何联系，可以在任何空闲内存上[构造]对象。eg:栈数组，静态内存上的数组
+
+2.Are header files necessary? When are they necessary? And when not? 
+(我认为)在这门课内的所有应用场景下，头文件几乎都不是必要的。
+(非模板的)函数用inline修饰即可直接在头文件中定义
+注意inline表示和内联展开，加快速度等并没有什么关系，见 http://en.cppreference.com/w/cpp/language/inline
+C++17还引入了变量的inline修饰，类似inline函数，使得变量可以直接在头文件中定义
+可以说除了一些egde case，头文件并不是"necessary"的
+
+在实际工程中头文件是有作用的，比如提高编译速度等。
+
+3.What is the multiple declaration error of header file? How to avoid the problem?
+class/struct的定义在同一个文件内多次重复产生错误。
+注意在多个文件中出现一个class/struct的多次定义并没有问题。
+解决:头文件保护(#ifdef..... 或者 #pragma once)
+
+4.What is the similarity（相同）and difference（不同） between class and struct in C++?
+默认的访问权限，默认的继承访问权限，模板定义中可以用typename/class，不能用struct
+其实最主要的不同还是理念上的不同，虽然struct可以用来当class用，但是它一般只用来当成C struct用
+
+5.By declaring structs or classes before their definitions, incomplete type 
+specifications can be used. Think about all possible usages (所有可能用法) of incomplete type specification.
+
+friend
+指针/引用
+(除array外)stl容器(本质上是指针)。
+An incomplete type T may be used when instantiating vector 
+T shall be complete before any member of the resulting specialization of vector is referenced.
