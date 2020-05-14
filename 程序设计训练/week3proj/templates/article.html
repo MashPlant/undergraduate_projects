@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ news.unmarked_title }}</title>
+</head>
+<body>
+<h2>{{ news.title|safe }}</h2>
+<hr width="80%" align="left">
+<b>发布日期</b> {{ news.time }}
+<hr width="80%" align="left">
+<b>关键词</b>
+{% for keyword in news.keywords_with_href %}
+    <a href={{ keyword.href }} style="text-decoration: none">
+    <button class="red">{{ keyword.word }}</button>
+    </a>
+{% endfor %}
+<hr width="80%" align="left">
+{% for para in news.content %}
+    <p> {{ para|safe }} </p>
+{% endfor %}
+<br>
+<b>相关推荐</b>
+<hr width="80%" align="left">
+{% for simlarity in news.similar_with_href %}
+    <a href={{ simlarity.href }}>{{ simlarity.title }}</a>
+    <br>
+{% endfor %}
+</body>
+</html>

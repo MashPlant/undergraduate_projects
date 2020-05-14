@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1757</width>
+                <height>1403</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>MainWindow</string>
+        </property>
+        <widget class="QWidget" name="centralWidget">
+            <widget class="QSlider" name="verticalSlider">
+                <property name="geometry">
+                    <rect>
+                        <x>1590</x>
+                        <y>410</y>
+                        <width>91</width>
+                        <height>491</height>
+                    </rect>
+                </property>
+                <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QMenuBar" name="menuBar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>1757</width>
+                    <height>49</height>
+                </rect>
+            </property>
+            <addaction name="actionConfigure"/>
+            <addaction name="actionDesign"/>
+        </widget>
+        <widget class="QToolBar" name="mainToolBar">
+            <attribute name="toolBarArea">
+                <enum>TopToolBarArea</enum>
+            </attribute>
+            <attribute name="toolBarBreak">
+                <bool>false</bool>
+            </attribute>
+        </widget>
+        <widget class="QStatusBar" name="statusBar"/>
+        <action name="actionConfigure">
+            <property name="text">
+                <string>configure</string>
+            </property>
+        </action>
+        <action name="actionDesign">
+            <property name="text">
+                <string>design</string>
+            </property>
+        </action>
+    </widget>
+    <layoutdefault spacing="6" margin="11"/>
+    <resources/>
+    <connections/>
+</ui>

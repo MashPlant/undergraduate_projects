@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>825</width>
+    <height>1215</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="buttonStart">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>1130</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonPause">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>1130</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>pause</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonZero">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>1130</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>zero</string>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNumber">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>1050</y>
+     <width>211</width>
+     <height>61</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

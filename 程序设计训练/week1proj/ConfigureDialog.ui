@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConfigureDialog</class>
+ <widget class="QDialog" name="ConfigureDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>737</width>
+    <height>532</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Configure</string>
+  </property>
+  <widget class="QLineEdit" name="lineEdit1">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>80</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint1">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>80</y>
+     <width>476</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>row/column count(5~8)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint2">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>130</y>
+     <width>461</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>inflow column1(0~count-1)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint3">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>180</y>
+     <width>461</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>inflow column2(if1+1~count-1)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint4">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>230</y>
+     <width>461</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>outflow column1(0~count-1)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint5">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>280</y>
+     <width>501</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>outflow column2(of1+1~count-1)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelHint6">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>330</y>
+     <width>511</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>outflow column3(of2+1~count-1)</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit2">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>130</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit3">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>180</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit4">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>230</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit5">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>280</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit6">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>330</y>
+     <width>113</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelResponse">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>450</y>
+     <width>129</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>invalid</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonOk">
+   <property name="geometry">
+    <rect>
+     <x>549</x>
+     <y>440</y>
+     <width>131</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ok</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

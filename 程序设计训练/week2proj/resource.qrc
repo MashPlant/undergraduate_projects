@@ -1,0 +1,41 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>image/OOS.GIF</file>
+    <file>image/BB.GIF</file>
+    <file>image/BP.GIF</file>
+    <file>image/BPS.GIF</file>
+    <file>image/RA.GIF</file>
+    <file>image/BOARD.GIF</file>
+    <file>image/BKS.GIF</file>
+    <file>image/BC.GIF</file>
+    <file>image/RCS.GIF</file>
+    <file>image/RN.GIF</file>
+    <file>image/RR.GIF</file>
+    <file>image/BNS.GIF</file>
+    <file>image/BBS.GIF</file>
+    <file>image/RB.GIF</file>
+    <file>image/RKM.GIF</file>
+    <file>image/RC.GIF</file>
+    <file>image/BA.GIF</file>
+    <file>image/BKM.GIF</file>
+    <file>image/RBS.GIF</file>
+    <file>image/RAS.GIF</file>
+    <file>image/OO.GIF</file>
+    <file>image/RPS.GIF</file>
+    <file>image/RKS.GIF</file>
+    <file>image/BN.GIF</file>
+    <file>image/BRS.GIF</file>
+    <file>image/RK.GIF</file>
+    <file>image/BK.GIF</file>
+    <file>image/BCS.GIF</file>
+    <file>image/RP.GIF</file>
+    <file>image/BR.GIF</file>
+    <file>image/RNS.GIF</file>
+    <file>image/RRS.GIF</file>
+    <file>image/BAS.GIF</file>
+    <file>sound/checkmate.wav</file>
+    <file>sound/down.wav</file>
+    <file>sound/down.mp3</file>
+    <file>sound/checkmate.mp3</file>
+</qresource>
+</RCC>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Client</class>
+ <widget class="QDialog" name="Client">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>857</width>
+    <height>905</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QLabel" name="labelFile">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>240</y>
+     <width>601</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Current File: None</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonMin">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>670</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>min</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonMax">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>670</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>max</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonAve">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>670</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>average</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonMid">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>670</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>median</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editMin">
+   <property name="geometry">
+    <rect>
+     <x>82</x>
+     <y>591</y>
+     <width>151</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editMax">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>590</y>
+     <width>151</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editAve">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>590</y>
+     <width>151</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editMid">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>590</y>
+     <width>151</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonSelect">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>420</y>
+     <width>170</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select File</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

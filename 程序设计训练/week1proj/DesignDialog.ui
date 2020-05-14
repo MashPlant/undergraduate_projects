@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DesignDialog</class>
+ <widget class="QDialog" name="DesignDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>737</width>
+    <height>532</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Design</string>
+  </property>
+  <widget class="QLabel" name="labelResponse">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>450</y>
+     <width>129</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>invalid</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonOk">
+   <property name="geometry">
+    <rect>
+     <x>549</x>
+     <y>440</y>
+     <width>131</width>
+     <height>48</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ok</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit1">
+   <property name="geometry">
+    <rect>
+     <x>599</x>
+     <y>104</y>
+     <width>121</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>116</y>
+     <width>224</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>expect  outflow1</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>317</y>
+     <width>108</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>sa times</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>183</y>
+     <width>224</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>expect  outflow2</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>250</y>
+     <width>511</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>expect  outflow3(of1+of2+of3=400)</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit2">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>170</y>
+     <width>121</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit3">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>240</y>
+     <width>121</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit4">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>310</y>
+     <width>121</width>
+     <height>42</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
