@@ -1,0 +1,264 @@
+%% compile with pdflatex or xelatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{homework}
+
+\title{Homework 3}
+\duedate{Mar 31, 2020}
+
+% TODO your name and ID
+\studentname{Chenhao Li}
+\studentid{2017011466}
+
+\usepackage{tikz}
+
+%% logical symbols
+% \land     /\
+% \lor      \/
+% \lnor     ¬
+% \to       ->
+% \lequiv   <->
+% \exists   ∃
+% \forall   ∀
+% \models   |=
+\newcommand{\lequiv}{\leftrightarrow}
+
+\newcommand{\nat}{\mathbb{N}}
+\renewcommand{\int}{\mathbb{Z}}
+\newcommand{\upd}[2]{\langle #1 \triangleleft #2 \rangle}
+
+\begin{document}
+
+\maketitle
+
+\textit{Read the instructions below carefully before you start working on the assignment:}
+\begin{itemize}
+    \item Please typeset your answers in the attached \LaTeX~source file, compile it to a PDF,
+    and finally hand the PDF to Tsinghua Web Learning \emph{before the due date}.
+    \item Make sure you fill in your \emph{name} and \emph{Tsinghua ID},
+    and replace all ``\texttt{TODO}''s with your solutions.
+    \item Any kind of dishonesty is \emph{strictly prohibited} in the full semester.
+    If you refer to any material that is not provided by us, you \emph{must cite} it.
+\end{itemize}
+
+%% problem begins
+
+\problem{Short-Answered Questions}
+
+\subproblem First-order logic is ``semidecidable'' -- which half is decidable?
+
+\begin{solution}
+    The validity of any valid first-order formula can be decided in finite time. 
+\end{solution}
+
+\subproblem Are the following statements about $T_\int$ true? Briefly explain the reason (you may use conclusions from lectures).
+
+\begin{enumerate}[label=(\alph*)]
+    \item $T_\int$ is decidable.
+    \item $T_\int$ is complete.
+    \item If a formula $\phi$ is both a $\Sigma_\int$-formula and a $\Sigma_\nat$-formula, then: $\phi$ is $T_\nat$-valid if and only if $\phi$ is $T_\int$-valid.
+\end{enumerate}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+      \item True. A $T_\int$-formula can be reduced into a $T_\nat$-formula, and $T_\nat$ is decidable. 
+      \item True. A $T_\int$-formula can be reduced into a $T_\nat$-formula, and $T_\nat$ is complete. 
+      \item False. $\exists x. x + 1 = 0$ is both a $\Sigma_\int$-formula and a $\Sigma_\nat$-formula, while it is $T_\int$-valid but not $T_\nat$-valid.
+    \end{enumerate}
+\end{solution}
+
+\subproblem Is the following formula $T_A$-valid? Briefly explain the reason:
+$$(a[i] = x \land x = y) \to a \upd{i}{y} = a$$
+
+\begin{solution}
+    No. In $T_A$, equality is only captured between array elements, i.e., there is no axiom to decide the equality between arrays. 
+\end{solution}
+
+\subproblem $T_A$ is not convex -- show that by providing a counterexample.
+
+\begin{solution}
+    Let $F: x = a \upd{i}{y}[j]$. It is easy to show that $F \Rightarrow x = a[j] \lor x = y$, but $F \not\Rightarrow x = a[j]$ and $F \not\Rightarrow  x = y$.
+\end{solution}
+
+\newpage
+\problem{Semantic Argument}
+
+Use the semantic method to check the validity of the following formulas.
+If not valid, please find a counterexample (a falsifying interpretation in its theory).
+
+\subproblem In $T_E$: $f(f(f(a))) = f(f(a)) \land f(f(f(f(a)))) = a \to (f(a) = a)$
+
+\begin{solution}
+    \begin{enumerate}
+      \item $I \not\models F$
+      \item $I \models (f(f(f(a))) = f(f(a)) \land f(f(f(f(a)))) = a) \land \lnot (f(a) = a)$, 1, $\to$
+      \item $I \models f(f(f(a))) = f(f(a)) \land f(f(f(f(a)))) = a$, 2, $\land$
+      \item $I \models \lnot(f(a) = a)$, 2, $\land$
+      \item $I \models f(f(f(a))) = f(f(a))$, 3, $\land$
+      \item $I \models f(f(f(f(a)))) = a$, 3, $\land$
+      \item $I \models f(f(f(f(a)))) = f(f(f(a)))$, 5, cong.
+      \item $I \models f(f(f(a))) = f(f(f(f(a))))$, 7, symm.
+      \item $I \models f(f(f(a))) = a$, 6, 8, trans.
+      \item $I \models f(f(f(f(a)))) = f(a)$, 9, cong.
+      \item $I \models f(a) = f(f(f(f(a))))$, 10, symm.
+      \item $I \models f(a) = a$, 6, 11, trans.
+      \item $I \not\models f(a) = a$, 4, $\lnot$
+      \item $I \models \bot$, 12, 13
+    \end{enumerate}
+  
+    So this formula is valid.
+\end{solution}
+
+\subproblem In $T_\int$: $(1 \le x \land x \le 2) \to (x = 1 \lor x = 2)$
+
+\begin{solution}
+  \begin{enumerate}
+    \item $I \not\models F$
+    \item $I \models (1 \le x \land x \le 2) \land \lnot (x = 1 \lor x = 2)$, 1, $\to$ 
+    \item $I \models 1 \le x \land x \le 2$, 2, $\land$ 
+    \item $I \models \lnot (x = 1 \lor x = 2)$, 2, $\land$ 
+    \item $I \not\models x = 1 \lor x = 2$, 4, $\lnot$ 
+    \item $I \models \lnot(x = 1)$, 5, $\lor$
+    \item $I \models \lnot(x = 2)$, 5, $\lor$
+    \item $I \models 1 \le x$, 3, $\land$
+    \item $I \models x \le 2$, 3, $\land$
+    \item $I \models 1 < x$, 6, 8, $T_\int$
+    \item $I \models x < 2$, 7, 9, $T_\int$
+    \item $I \models x \le 1$, 11, $T_\int$
+    \item $I \models \bot$, 10, 12, $T_\int$
+  \end{enumerate}
+
+  So this formula is valid.
+\end{solution}
+
+\subproblem In $T_A$: $a \upd{i}{e} [j]= e \to a[j] = e$
+
+\begin{solution}
+  \begin{enumerate}
+    \item $I \not\models F$
+    \item $I \models a \upd{i}{e} [j]= e \land a[j] = e$, 1, $\to$
+    \item $I \models a \upd{i}{e} [j]= e$, 2, $\land$
+    \item $I \models a[j] = e$, 2, $\land$
+  \end{enumerate}
+  No contradiction can be drawn, so this formula is not valid. A falsifying interpretation can be: $D = \{c_a, c_i, c_j, x, y\}$, $I = \{ a \mapsto c_a, i \mapsto c_i, j \mapsto c_i, e \mapsto x \}$ and $c_a[c_i] = y$, $c_a[c_j] = x$.
+\end{solution}
+
+\newpage
+\problem{Decision Procedure for Theories}
+
+\subproblem Apply the decision procedure for quantifier-free $T_E$ to the following $\Sigma_E$-formula:
+$$p(x) \land f(f(x)) = x \land f(f(f(x))) = x \land \lnot p(f(x))$$
+
+\begin{solution}
+  First transform it into an EUF-formula: $f_p(x) = \bullet \land f(f(x)) = x \land f(f(f(x))) = x \land f_p(f(x)) \ne \bullet$
+  
+  $S_F = \{\bullet, x, f(x), f_p(x), f(f(x)), f_p(f(x)), f(f(f(x)))\}$
+  
+  \begin{enumerate}[label = Step \arabic*:, start = 0]
+    \item $\{\{\bullet\}, \{x\}, \{f(x)\}, \{f_p(x)\}, \{f(f(x))\}, \{f_p(f(x))\}, \{f(f(f(x)))\}\}$
+    
+    \item From $f_p(x) = \bullet$, merge $\{\bullet\}$ and $\{f_p(x)\}$:
+    
+    $\{\{\bullet, f_p(x)\}, \{x\}, \{f(x)\}, \{f(f(x))\}, \{f_p(f(x))\}, \{f(f(f(x)))\}\}$
+    
+    \item From $f(f(x)) = x$, merge $\{f(f(x))\}$ and $\{x\}$:
+    
+    $\{\{\bullet, f_p(x)\}, \{x, f(f(x))\}, \{f(x)\}, \{f_p(f(x))\}, \{f(f(f(x)))\}\}$
+    
+    From $f(f(x)) = x$, propagate $\{f(f(f(x)))\}$ and $\{f(x)\}$:
+    
+    $\{\{\bullet, f_p(x)\}, \{x, f(f(x))\}, \{f(x), f(f(f(x)))\}, \{f_p(f(x))\}\}$
+    
+    \item From $f(f(f(x))) = x$, merge $\{x, f(f(x))\}$ and $\{f(x), f(f(f(x)))\}$:
+    
+    $\{\{\bullet, f_p(x)\}, \{x, f(x), f(f(x)), f(f(f(x)))\}, \{f_p(f(x))\}\}$
+    
+    From $f(x) = x$, propagate $f_p(x) = f_p(f(x))$:
+    
+    $\{\{\bullet, f_p(x), f_p(f(x))\}, \{x, f(x), f(f(x)), f(f(f(x)))\}\}$
+  \end{enumerate}
+
+  The final result is the congruence clusure of $S_F$. $F$ asserts $f_p(f(x)) \ne \bullet$ while $f_p(f(x)) \sim \bullet$, so unsat.
+\end{solution}
+
+\subproblem Apply the decision procedure for quantifier-free $T_A$ to the following $\Sigma_A$-formula:
+$$a\upd{i}{e}\upd{j}{f}[k]=g \land j\not=k \land i=j \land a[k]\not=g$$
+
+\begin{solution}
+  \begin{itemize}
+    \item For $F$, assume $j = k$:
+    
+     $F_1: f=g \land j\not=k \land i=j \land a[k]\not=g \land j = k$
+     
+     which has no write terms, so build a $T_E$-formula:
+     
+     $F_1^\prime: f = g \land j\not=k \land i=j \land a(k)\not=g \land j = k$
+     
+     which is not satisfiable.
+    \item For $F$, assume $j \ne k$:
+    
+    $F_2: a\upd{i}{e}[k] = g \land j\not=k \land i=j \land a[k]\not=g \land j \ne k$
+    
+    \begin{itemize}
+      \item For $F_2$, assume $i = k$:
+      
+      $F_3: e = g \land j\not=k \land i=j \land a[k]\not=g \land j \ne k \land i = k$
+       
+      which has no write terms, so build a $T_E$-formula:
+      
+      $F_3^\prime: e = g \land j\not=k \land i=j \land a(k)\not=g \land j \ne k \land i = k$
+       
+      which is not satisfiable.
+      
+      \item For $F_2$, assume $i \ne k$:
+      
+      $F_4: a[k] = g \land j\not=k \land i=j \land a[k]\not=g \land j \ne k \land i \ne k$
+      
+      which has no write terms, so build a $T_E$-formula:
+      
+      $F_4^\prime: a(k) = g \land j\not=k \land i=j \land a(k)\not=g \land j \ne k \land i \ne k$
+      
+      which is not satisfiable.
+    \end{itemize}
+  \end{itemize}
+
+  Every branch reaches contradiction, so unsat.
+\end{solution}
+
+\subproblem Apply the Nelson-Oppen method to the following formula in $T_\int \cup T_A$:
+$$a[i] \ge 1 \land a[i]+x \le 2 \land x>0 \land x=i \land a\upd{x}{2}[i]\not=1$$
+Do it first using the nondeterministic version (i.e. guess and check), and then the deterministic version (i.e. equality propagation).
+
+\begin{solution}
+    First purify $F$ to obtain $F_1$ and $F_2$:
+    \begin{align*}
+      F &= w_1 \ge 1 \land w_1+x \le 2 \land x>0 \land x=i \land w_2\not=1 \land a[i] = w_1 \land w_2 = a\upd{x}{w_3}[i] \land w_3 = 2 \\
+      F_1 &= w_1 \ge 1 \land w_1+x \le 2 \land x>0 \land x=i \land w_2\not=1 \land w_3 = 2 \\ 
+      F_2 &= w_1 = a[i] \land w_2 = a\upd{x}{w_3}[i] \\
+      V &= free(F_1) \cap free(F_2) = \{w_1, w_2, w_3, x, i\}
+    \end{align*}
+    \begin{itemize}
+      \item Guess-and-check method
+      
+      Enumerate all the equivalence relation $E$ on $V$:
+      
+      \begin{enumerate}
+        \item $\{\{w_1, x, i\}, \{w_2, w_3\}\}$: sat.
+      \end{enumerate}
+      
+      Maybe I am lucky enough to find the correct equivalence relation within one guess.
+      
+      \item Equality propagation method
+      \begin{align*}
+        F_1 &\models x = i \\
+        F_2 \land x = i &\models w_2 = w_3 \\
+        F_2 \land w_2 = w_3 &\models x = w_1
+      \end{align*}
+      Now no more equality can be drawn, so sat.
+      
+    \end{itemize}
+\end{solution}
+
+%% problem ends
+
+\end{document}

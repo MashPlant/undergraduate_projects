@@ -1,0 +1,376 @@
+%% compile with pdflatex or xelatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{homework}
+
+\title{Homework 2}
+\duedate{Mar 24, 2020}
+
+% TODO your name and ID
+\studentname{Chenhao Li}
+\studentid{2017011466}
+
+\usepackage{tikz}
+
+\usepackage{listings}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{backgray}{gray}{0.95}
+\lstdefinestyle{dafny}{ % dafny syntax highlight
+	belowcaptionskip=1\baselineskip,
+	breaklines=true,
+	language=C,
+	showstringspaces=false,
+	numbers=left,
+	xleftmargin=2em,
+	framexleftmargin=1.5em,
+	numbersep=5pt,
+	numberstyle=\tiny\color{mygray},
+	basicstyle=\small\ttfamily,
+	keywordstyle=\color{blue},
+	commentstyle=\itshape\color{purple!40!black},
+	morekeywords={
+		abstract, array, as, assert, assume, bool, break, calc, case, char, class, codatatype, colemma, constructor, copredicate, datatype, decreases, default, else, ensures, exists, extends, false, forall, free, fresh, function, ghost, if, imap, import, in, include, inductive, int, invariant, iset, iterator, label, lemma, map, match, method, modifies, modify, module, multiset, nat, new, newtype, null, object, old, opened, predicate, print, protected, reads, real, refines, requires, return, returns, seq, set, static, string, then, this, trait, true, type, var, where, while, yield, yields
+	},
+	tabsize=2,
+	backgroundcolor=\color{backgray}
+}
+\lstset{style=dafny}
+
+%% logical symbols
+% \land     /\
+% \lor      \/
+% \lnor     ¬
+% \to       ->
+% \lequiv   <->
+% \exists   ∃
+% \forall   ∀
+% \models   |=
+\newcommand{\lequiv}{\leftrightarrow}
+\newcommand{\nat}{\mathbb{N}}
+
+\begin{document}
+
+\maketitle
+
+\textit{Read the instructions below carefully before you start working on the assignment:}
+\begin{itemize}
+    \item In this assignment, you are asked to both typeset your answers in the attached \LaTeX~source file, and also complete the missing code in the Dafny file \texttt{PA.dfy}.
+    Make sure that the Dafny complier can type check your code!
+    When done, compile this file to a PDF.
+    Compress the PDF and \texttt{PA.dfy} to an \texttt{.zip} archive and hand it to Tsinghua Web Learning \emph{before the due date}.
+    \item Make sure you fill in your \emph{name} and \emph{Tsinghua ID},
+    and replace all ``\texttt{TODO}''s with your solutions.
+    \item Any kind of dishonesty is \emph{strictly prohibited} in the full semester.
+    If you refer to any material that is not provided by us, you \emph{must cite} it.
+\end{itemize}
+
+%% problem begins
+
+\problem{Short-Answered Questions}
+
+\subproblem Underline all free variables (to be precise, their occurrences) in the following first-order formula:
+\begin{equation*}
+    \forall x. (f(x) \land (\exists y. g(x, y, z))) \land (\exists z. g(x, y, z))
+\end{equation*}
+
+\begin{solution}
+\begin{equation*}
+    \forall x. (f(x) \land (\exists y. g(x, y, \underline{z}))) \land (\exists z. g(\underline{x}, \underline{y}, z))
+\end{equation*}
+\end{solution}
+
+\subproblem Which of the following problems or theories are decidable?
+
+\begin{enumerate}[label=(\alph*)]
+    \item Deciding validity for propositional logic.
+    \item Deciding validity for first-order logic.
+    \item $T_{E}$.
+    \item $T_{\nat}$.
+    \item The quantifier-free fragment of $T_A$.
+\end{enumerate}
+
+\begin{solution}
+    (a), (d), (e)
+\end{solution}
+
+\subproblem Find an equivalence relation that is not a congruence relation.
+
+\begin{solution}
+    Let $S$ be the set of natural number pairs, $=_0$ be a binary relation on $S$, such that $a =_0 b$ iff $fst(a) = fst(b)$. It is easy to show that $=_0$ is an equivalence relation. However, $=_0$ is not a congruence relation: let $f(a) = fst(a) + snd(a)$, then $a =_0 b \not\to f(a) = f(b)$
+\end{solution}
+
+\subproblem Find two distinct equivalence relations such that one refines the other.
+
+\begin{solution}
+    Let $S = \{0, 1\}$, $R_1 = \{(0, 0), (1, 1)\}$, $R_2 = \{(0, 0), (0, 1), (1, 0), (1, 1)\}$, then both $R_1$ and $R_2$ are equivalence relations and $R_1$ refines $R_2$. 
+\end{solution}
+
+\subproblem In the congruence closure algorithm, subterms of a formula are represented by DAGs.
+Which term does \cref{fig:subterm} represents?
+Write it out in a formulaic way.
+
+\tikzstyle{node} = [draw, circle, text centered, minimum width=2em]
+\tikzstyle{next} = [draw, ->]
+\begin{figure}[ht]
+    \begin{minipage}[b]{.45\textwidth}
+        \centering
+        \begin{tikzpicture}[every node/.style=node, every path/.style=next]
+            \node {$f$}
+                child {
+                    node (f2) {$f$}
+                    child {
+                        node {$f$}
+                        child {
+                            node {$x$}
+                        }
+                        child {
+                            node (y) {$y$}
+                        }
+                    }
+                }
+                child {
+                    node {$z$}
+                }
+            ;
+            \path (f2) to [bend left] (y);
+        \end{tikzpicture}
+        \caption{A subterm.}
+        \label{fig:subterm}
+    \end{minipage}
+    \begin{minipage}[b]{.45\textwidth}
+        \centering
+        \begin{tikzpicture}[every node/.style=node, every path/.style=next]
+            \node {$f$}
+                child {
+                    node {$f$}
+                    child {
+                        node (f3) {$f$}
+                        child {
+                            node {$f$}
+                            child {
+                                node (x) {$x$}
+                            }
+                        }
+                    }
+                }
+            ;
+        \path [draw, dashed] (f3) to [bend left] (x);
+    \end{tikzpicture}
+    \caption{A DAG.}
+    \label{fig:dag}
+    \end{minipage}
+\end{figure}
+
+\begin{solution}
+    The figure represents term $f(f(f(x, y), y), z)$. It also indicates \\ $S_F = \{x, y, z, f(x, y), f(f(x, y), y), f(f(f(x, y), y), z)\}$
+\end{solution}
+
+\subproblem \cref{fig:dag} presents a DAG in an execution of the congruence closure algorithm.
+The dashed edge was inserted via a union operation.
+Which congruences classes can you infer from this figure?
+
+\begin{solution}
+    \begin{align*}
+        [x]_{\sim} &= \{x, f(f(x)), f(f(f(f(x))))\} \\
+        [f(x)]_{\sim} &= \{f(x), f(f(f(x)))\}
+    \end{align*}    
+\end{solution}
+
+\newpage
+\problem{Peano Arithmetic}
+
+In this problem, we will show that two ways of defining natural numbers are, to some extent, the same -- one is using the axioms of Peano Arithmetic, and another is using an inductive set whose elements are what we mean ``natural numbers''.
+
+To receive full credit of this problem, you must both:
+\begin{itemize}
+    \item complete the proofs in \texttt{PA.dfy}, and
+    \item fill in the missing manual proofs in this file.
+\end{itemize}
+There is an example that has been done for you.
+You should read it carefully before you start.
+
+\paragraph*{PA}
+
+Recall that \emph{Peano Arithmetic} (PA) is a first-order theory with signature:
+\[
+\Sigma_\mathit{PA}: \{0, 1, +, \times, =\}
+\]
+where:
+\begin{itemize}
+    \item $0$ and $1$ are constants
+    \item $+$ and $\times$ are binary functions
+    \item $=$ is a binary predicate
+\end{itemize}
+
+It has the following axioms:
+\begin{itemize}
+    \item All of the equality axioms: reflexivity, symmetry, transitivity, and congruence
+    \item \emph{Zero:} $\forall x .~\lnot(x + 1 = 0)$
+    \item \emph{Additive identity:} $\forall x .~x + 0 = x$
+    \item \emph{Times zero:} $\forall x .~x \times 0 = 0$
+    \item \emph{Successor:} $\forall x, y .~(x + 1 = y + 1) \to x = y$
+    \item \emph{Plus successor:} $\forall x, y .~x + (y + 1) = (x + y) + 1$
+    \item \emph{Times successor:} $\forall x, y .~x \times (y + 1) = x \times y + x$
+\end{itemize}
+It also has an axiom schema for induction:
+\[
+(F[0] \land (\forall x . F[x] \to F[x + 1])) \to \forall x . F[x]
+\]
+
+The intended interpretation for this theory is the natural numbers with constant symbols 0 and 1, a predicate symbol $=$ taking equality over $\nat$, and function symbols $+,\times$ taking the corresponding expected functions over $\nat$.
+
+\paragraph*{Natural Numbers as an Inductive Set}
+
+On the other hand, we could define natural numbers as an \emph{inductive} set $S$, i.e. a \emph{minimum} set whose elements are generated by using only the following two rules:
+\begin{itemize}
+    \item $0 \in S$;
+    \item if $n \in S$, then $\textsf{Succ}(n) \in S$.
+\end{itemize}
+In fact, our familiar $\nat = S$ as defined above.
+Using the above notion, 1 is represented by $\textsf{Succ}(0)$; 2 is represented by $\textsf{Succ}(\textsf{Succ}(0))$; and so on.
+
+The above definition can be easily expressed in Dafny, as an inductive type:
+\begin{lstlisting}
+datatype Nat = Zero | Succ(n: Nat)
+\end{lstlisting}
+We then define the constant 1, as well as the functions for addition and multiplication as follows:
+\begin{lstlisting}
+function one(): Nat
+{
+  Succ(Zero)
+}
+
+function add(x: Nat, y: Nat): Nat
+{
+  match(x) {
+    case Zero => y
+    case Succ(n) => Succ(add(n, y))
+  }
+}
+
+function mult(x: Nat, y: Nat): Nat
+{
+  match(x) {
+    case Zero => Zero
+    case Succ(n) => add(mult(n, y), y)
+  }
+}
+\end{lstlisting}
+
+In this problem, you will use Dafny to prove that the inductively-defined \texttt{Nat} type satisfies the axioms of PA.
+
+\paragraph*{The Calc Statement}
+
+Before getting started, you should read section 21.17 of the Dafny manual to understand the basic usage of Calc statements, started with the keyword \texttt{calc}.
+
+\paragraph*{Instructions}
+
+In \texttt{PA.dfy}:
+Provide the correct pre- and post-conditions for lemmas \emph{Zero} (2-1), \emph{Times zero} (2-3), \emph{Successor} (2-4), \emph{Plus successor} (2-5) and \emph{Time successor} (2-6),
+and the bodies of your lemmas must satisfy each postcondition.
+The proof for \emph{Additive identity} (2-2) is provided as an example.
+If you use an \texttt{assume} statement in any of your lemmas, you will receive \emph{partial} (i.e. not full) credits.
+
+Moreover, in this file:
+Write a \emph{careful manual} proof for each of the lemmas above.
+Again, the manual proof for \emph{Additive identity} (2-2) is  provided as an example.
+By saying \emph{careful}, we mean that your proof must include all details and you should explain the reasons for each step.
+Remember that the only thing you know are:
+(1) the definitions of the functions listed in \texttt{PA.dfy}, and 
+(2) a couple of ``built-in'' proof strategies (supported by Dafny and we admit them) including the (structural) induction, proof-by-contradiction and all equality axioms.
+
+\paragraph{Proofs}
+
+\subproblem{\emph{Zero}}
+
+\begin{proof}
+  $x + 1$ is the successor of $x$, while $0$ is not the successor of any natural number, so $x + 1 \ne 0$.
+\end{proof}
+
+\subproblem{\emph{Additive identity} (example)}
+
+\begin{proof}
+  By contradiction. Suppose that $x + 0 = x$ does not held for some $x$. Then, there are only two possible choices:
+  \begin{itemize}
+    \item $x$ is zero, i.e. $x = 0$. By definition of $+$, we know that $x + 0 = 0 + 0 = 0$. Since $0 = x$, we conclude that $x + 0 = x$, contradiction!
+    \item $x$ is the successor of $n$, i.e. $x = n + 1$. By definition of $+$, we know that $x + 0 = (n + 1) + 0 = (n + 0) + 1$. By inductive hypothesis, $n + 0 = n$. Thus, $(n + 0) + 1 = n + 1 = x$. We again conclude that $x + 0 = x$, contradiction!
+  \end{itemize}
+  Therefore, $x + 0 = x$ holds for every $x$.
+\end{proof}
+
+\subproblem{\emph{Times zero}}
+
+\begin{proof} 
+  There are only two possible choices:
+  \begin{itemize}
+    \item $x$ is zero, i.e., $x = 0$. By definition of $\times$, we know that $x \times 0 = 0 \times 0 = 0$.
+    \item $x$ is the successor of $n$, i.e., $x = n + 1$. By definition of $\times$, $x \times 0 = (n + 1) \times 0 = n \times 0 + 0$. By axiom \emph{Additive identity}, $n \times 0 + 0 = n \times 0$. By inductive hypothesis, $n \times 0 = 0$.
+  \end{itemize}
+  Therefore, $x \times 0 = x$ holds for every $x$.
+\end{proof}
+
+\subproblem{\emph{Successor}}
+
+\begin{proof}
+  $x + 1$ is the successor of $x$, and $y + 1$ is the successor of $y$. Since every natural number has one unique successor and $x + 1 = y + 1$, we conclude that $x = y$.
+\end{proof}
+
+\subproblem{\emph{Plus successor}}
+
+Let us first prove a stronger lemma \emph{Associative law of addition}: $x + (y + z) = (x + y) + z$.
+
+\begin{proof}
+  There are only two possible choices:
+  \begin{itemize}
+    \item $x$ is zero, i.e., $x = 0$. By definition of $+$, $x + (y + z) = 0 + (y + z) = y + z$, and $(x + y) + z = (0 + y) + z = y + z$.
+    \item $x$ is the successor of $n$, i.e., $x = n + 1$. 
+    
+    For the left hand term, by definition of $+$, $x + (y + z) = (n + 1) + (y + z) = (n + (y + z)) + 1$. By inductive hypothesis, $(n + (y + z)) + 1 = ((n + y) + z) + 1$.
+    
+    For the right hand term, by definition of $+$, $(x + y) + z = ((n + 1) + y) + z = ((n + y) + 1) + z = ((n + y) + z) + 1$.
+  \end{itemize}
+   Therefore, $x + (y + z) = (x + y) + z$ holds for every $x,y , z$.
+\end{proof}
+
+Now let us get back to axiom \emph{Plus successor}.
+
+\begin{proof}
+  Simply apply lemma \emph{Associative law of addition}, and let $z = 1$, we conclude that $x + (y + 1) = (x + y) + 1$.
+\end{proof}
+
+\subproblem{\emph{Times successor}}
+
+Let us first prove a lemma \emph{Commutative law of addition}: $x + y = y + x$.
+
+\begin{proof}
+  There are only two possible choices:
+  \begin{itemize}
+    \item $x$ is zero, i.e., $x = 0$. By definition of $+$, $x + y = 0 + y = y$. By axiom \emph{Additive identity}, $y + x = y + 0 = y$.
+    \item $x$ is the successor of $n$, i.e., $x = n + 1$.
+    
+    For the left hand term, by definition of $+$, $x + y = (n + 1) + y = (n + y) + 1$. By inductive hypothesis, $(n + y) + 1 = (y + n) + 1$.
+    
+    For the right hand term, by lemma \emph{Associative law of addition} $y + x = y + (n + 1) = (y + n) + 1$.
+  \end{itemize}
+  Therefore, $x + y = y + x$ holds for every $x, y$.
+\end{proof}
+
+Now let us get back to axiom \emph{Times successor}.
+
+\begin{proof}
+  There are only two possible choices:
+  \begin{itemize}
+    \item $x$ is zero, i.e., $x = 0$. By definition of $\times$, $x \times (y + 1) = 0 + \times (y + 1) = 0$. By definition of $+$ and $\times$, $(x \times y) + x = (0 \times y) + 0 = 0 + 0 = 0$.
+    
+    \item $x$ is the successor of $n$, i.e., $x = n + 1$.
+    
+    For the left hand term, by definition of $\times$, $x \times (y + 1) = (n + 1) \times (y + 1) = n \times (y + 1) + (y + 1)$. By inductive hypothesis, $n \times (y + 1) + (y + 1) = (n \times y + n) + (y + 1)$. By lemma \emph{Associative law of addition}, $(n \times y + n) + (y + 1) = (n \times y) + (n + (y + 1))$. By lemma \emph{Associative law of addition}, $(n \times y) + (n + (y + 1)) = (n \times y) + ((n + y) + 1)$. By lemma \emph{Commutative law of addition}, $(n \times y) + ((n + y) + 1) = (n \times y) + ((y + n) + 1)$.
+    
+    For the right hand term, by definition of $\times$, $x \times y + x = (n + 1) \times y + (n + 1) = (n \times y + y) + (n + 1)$. By lemma \emph{Associative law of addition}, $(n \times y + y) + (n + 1) = (n \times y) + (y + (n + 1))$. By lemma \emph{Associative law of addition}, $(n \times y) + (y + (n + 1)) = (n \times y) + ((y + n) + 1)$.
+  \end{itemize}
+  Therefore, $x \times (y + 1) = x \times y + x$ holds for every $x, y$.
+\end{proof}
+
+%% problem ends
+
+\end{document}

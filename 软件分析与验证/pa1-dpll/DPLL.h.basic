@@ -1,0 +1,130 @@
+//
+// DPLL algorithm.
+//
+
+#ifndef DPLL_DPLL_H
+#define DPLL_DPLL_H
+
+#include "common.h"
+#include <algorithm>
+
+using u32 = unsigned;
+
+struct Var {
+  u32 id : 31;
+  u32 flag : 1;
+};
+
+struct VarInfo {
+  enum {
+    Undef = 0, Pos = 1, Neg = -1
+  } state;
+  std::vector<u32> pos_clauses;
+  std::vector<u32> neg_clauses;
+};
+
+class DPLL {
+public:
+  DPLL(const formula &phi) : bad(false), clauses(phi.clauses.size()), vars(phi.num_variable) {
+    for (u32 i = 0; i < phi.clauses.size(); ++i) {
+      const clause &cls = phi.clauses[i];
+      std::vector<Var> cls_vars(cls.size());
+      for (u32 j = 0u; j < cls.size(); ++j) {
+        cls_vars[j] = Var{.id = (u32) std::abs(cls[j]) - 1, .flag = cls[j] > 0};
+      }
+      clauses[i] = std::move(cls_vars);
+    }
+    while (!bad) {
+      auto it = std::find_if(clauses.begin(), clauses.end(),
+                             [](std::vector<Var> &cls) { return cls.size() <= 1; });
+      if (it == clauses.end()) { break; }
+      if (it->size() == 1) {
+        Var lit = (*it)[0];
+        clauses.erase(it);
+        vars[lit.id].state = lit.flag ? VarInfo::Pos : VarInfo::Neg;
+        auto new_end = std::remove_if(clauses.begin(), clauses.end(), [lit](std::vector<Var> &cls) {
+          bool has_pos = false;
+          auto new_end = std::remove_if(cls.begin(), cls.end(), [lit, &has_pos](Var x) {
+            if (x.id == lit.id && x.flag == lit.flag) { has_pos = true; }
+            return x.id == lit.id;
+          });
+          cls.erase(new_end, cls.end());
+          return has_pos;
+        });
+        clauses.erase(new_end, clauses.end());
+      } else { bad = true; }
+    }
+    for (u32 i = 0; i < clauses.size(); ++i) {
+      for (Var lit : clauses[i]) {
+        (lit.flag ? vars[lit.id].pos_clauses : vars[lit.id].neg_clauses).push_back(i);
+      }
+    }
+  }
+
+  bool check_sat() {
+    if (bad) { return false; }
+    std::vector<Var> seq;
+    std::vector<Var> stk;
+    while (true) {
+      auto it = std::find_if(vars.begin(), vars.end(), [](VarInfo &v) { return v.state == VarInfo::Undef; });
+      if (it == vars.end()) { break; }
+      stk.push_back(Var{.id = (u32) (it - vars.begin()), .flag = 1});
+      u32 is_decision = 1;
+      while (!stk.empty()) {
+        again:
+        auto[top, pos] = stk.back();
+        stk.pop_back();
+        if (vars[top].state != VarInfo::Undef) {
+          if ((vars[top].state == VarInfo::Pos) != pos) {
+            while (!seq.empty()) {
+              Var assign = seq.back();
+              auto old = vars[assign.id].state;
+              vars[assign.id].state = VarInfo::Undef;
+              seq.pop_back();
+              if (assign.flag) {
+                stk.clear();
+                stk.push_back(Var{.id=assign.id, .flag = old == VarInfo::Neg});
+                goto again;
+              }
+            }
+            return false;
+          }
+        } else {
+          vars[top].state = pos ? VarInfo::Pos : VarInfo::Neg;
+          seq.push_back(Var{.id = top, .flag = is_decision});
+          is_decision = 0;
+          for (u32 cls : pos ? vars[top].neg_clauses : vars[top].pos_clauses) {
+            Var unit;
+            u32 count = 0;
+            for (Var lit : clauses[cls]) {
+              if (vars[lit.id].state == VarInfo::Undef) {
+                if (++count != 1) { break; }
+                unit = lit;
+              } else if ((vars[lit.id].state == VarInfo::Pos) == lit.flag) {
+                count = 2;
+                break;
+              }
+            }
+            if (count == 1) { stk.push_back(unit); }
+          }
+        }
+      }
+    }
+    for (u32 i = 0; i < vars.size(); ++i) {
+      assert(vars[i].state != VarInfo::Undef);
+      result.insert({i + 1, vars[i].state == VarInfo::Pos});
+    }
+    return true;
+  }
+
+  model get_model() { return result; }
+
+private:
+  bool bad;
+  std::vector<std::vector<Var>> clauses;
+  std::vector<VarInfo> vars;
+  model result;
+};
+
+
+#endif //DPLL_DPLL_H

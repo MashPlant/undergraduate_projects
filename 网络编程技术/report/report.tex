@@ -1,0 +1,115 @@
+\documentclass[12pt, UTF8]{article}
+\usepackage[a4paper, scale = 0.8]{geometry}
+\usepackage{ctex}
+
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{color}
+\definecolor{GrayCodeBlock}{RGB}{241, 241, 241}
+%\definecolor{BlackText}{RGB}{110, 107, 94}
+\definecolor{BlackText}{RGB}{0, 0, 0}
+\definecolor{RedTypename}{RGB}{182, 86, 17}
+\definecolor{GreenString}{RGB}{96, 172, 57}
+\definecolor{PurpleKeyword}{RGB}{184, 84, 212}
+\definecolor{GrayComment}{RGB}{170, 170, 170}
+\definecolor{GoldDocumentation}{RGB}{180, 165, 45}
+\lstset {
+  columns = fullflexible, keepspaces = true, showstringspaces=false, breaklines = true, frame = single, framesep = 0pt, framerule = 0pt, framexleftmargin = 4pt, framexrightmargin = 4pt, framextopmargin = 5pt, framexbottommargin = 3pt, xleftmargin = 4pt, xrightmargin = 4pt,
+  backgroundcolor = \color{GrayCodeBlock},
+  basicstyle = \ttfamily\color{BlackText},
+  keywordstyle = \color{PurpleKeyword},
+  ndkeywordstyle = \color{RedTypename},
+  stringstyle = \color{GreenString},
+  commentstyle = \color{GrayComment}
+}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\usepackage[colorlinks, linkcolor = red, anchorcolor = blue, citecolor = green]{hyperref}
+
+\renewcommand\thesection{\arabic{section}}
+
+\title{网络编程技术TCP编程作业报告}
+\author{李晨昊 2017011466}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{运行方式}
+
+直接执行\lstinline|make|即可编译出\lstinline|server|(需要支持\lstinline|C++ 17|的编译器)。\lstinline|server|可以带一个参数执行或者直接执行，参数用于指示监听的地址，不带参数时默认监听0.0.0.0地址。总是监听8000端口。
+
+我自己已经编写了一个客户端软件来验证它的正确性，只是没有一起提交上来。
+
+\section{协议设计}
+
+我实现了一个简单的带登录功能的文件上传/下载服务器。
+
+用户建立连接后，首先需要依次发送两个大端序16位无符号整数，分别表示接下来要发送的用户名和密码的长度。接着依次发送对应长度的用户名和密码。发送的这些数据之间都没有分隔符，后续的操作也是一样的。服务器将校验用户名和密码，如果用户名已经存在则视为登录操作，取出文件中的密码与之进行比对；否则视为注册操作。
+
+完成登陆/注册后，对于每个操作，用户先发送两个大端序32位无符号整数，称之为\lstinline|arg1|和\lstinline|arg2|。\lstinline|arg1|的低两位表示操作类型，总共有四种：
+
+\begin{enumerate}[label = \arabic*:, start = 0]
+  \item 下载文件：arg1的17-3位表示文件名长度。接着发送对应长度的文件名，服务器完成文件读取后发送文件内容。
+  \item 上传文件：arg1的17-3位表示文件名长度，arg2表示文件长度。接着依次发送对应长度的文件名和文件，服务器保存这个文件，接着发送信息表示成功。
+  \item 列出所有文件：服务器发送一个字符串，其内容与\lstinline|ls|的结果类似。
+  \item 中断连接。
+\end{enumerate}
+
+在以上操作的任何一步中遇到错误时，服务器都会发送一个错误信息并且中断连接。唯一的一个例外是如果试图下载一个不存在的文件，服务器只会发送一个错误信息，而不会中断连接。
+
+所有服务器发送的信息的格式都是先发送两个大端序32位无符号整数，第一个整数为零表示操作成功，否则为失败。第二个整数表示接下来的信息的长度，然后发送对应长度的字节串。
+
+\section{程序架构设计}
+
+\subsection{基本设计}
+
+我实现的是一个简单的基于\lstinline|pthread|的多线程服务器，主线程不断监听到来的连接，建立好连接之后派生出线程，每个线程负责一个连接的处理。处理连接的时候，首先进行登录/注册操作，为每个用户建立一个密码文件和一个用于存储用户文件的文件夹，然后开始类似REPL的收发过程。
+
+我考虑了一种可能的线程冲突的情景，即多个线程同时执行注册操作时可能会发生不一致，所以我在这里使用了锁。其余地方我都没有使用锁，如果是在服务过程中发生的冲突，可能对用户而言会产生困惑，但是不会影响到服务器的工作状态，所以无需保护。
+
+我为socket设定了一些课上提到的参数，包括\lstinline|SO_REUSEADDR|，\lstinline|TCP_NODELAY|，\lstinline|SO_LINGER|等，还设置了忽略\lstinline|SIGPIPE|信号，detach派生出的线程。
+
+\subsection{资源管理}
+
+\lstinline|C++|中提倡用RAII-style来管理和释放资源，但是我们往往需要和文件描述符，\lstinline|mmap|的内存等打交道，这些在标准库中并没有直接的管理者，如果都要用RAII-style的类管理起来的话会增加很多代码量，所以我选择了一种折衷的办法，仍然需要程序员手动指定释放资源的操作，但是不需要指定释放资源的时机，而是在当前代码块结束后自动释放：
+
+\begin{lstlisting}[language = C++, ndkeywords = { DEFER }]
+// need C++17 template deduction guide
+#define DEFER(f) Defer DEFER_0(__deferred)([&]() { f; })
+
+template <typename F>
+struct Defer {
+  F f;
+  Defer(F f) : f(f) {}
+  ~Defer() { f(); }
+};
+\end{lstlisting}
+
+这是模仿\lstinline|Go|的资源管理管理方式，不过实现的机制和\lstinline|Go|并不一样。在一个语句块中使用\lstinline|DEFER(f)|，就会在这个地方定义一个保存了这个操作的变量，在它析构时会执行这个操作。这里\lstinline|DEFER_0|宏是用来给变量名字加上一个计数器后缀的，这样可以允许一个块中多次使用\lstinline|DEFER|。
+
+\subsection{错误处理}
+
+在我的错误处理的设计中，最核心的部分是\lstinline|TRY|宏：
+
+\begin{lstlisting}[language = C++, ndkeywords = { TRY }]
+#define TRY(op, require) \
+  ({ auto __x = op; if (!(__x require)) return perror(#op), false; __x; })
+\end{lstlisting}
+
+这就相当于\lstinline|Rust|中的\lstinline|try!|宏或者是\lstinline|?|运算符的一个非常简易的模拟。它的作用是在一个返回\lstinline|bool|值的函数中执行一个操作，如果返回值不满足要求则输出错误信息(这不是必要的，仅做调试用途)并返回\lstinline|false|，中止当前的执行并且把错误信息报告给上层；如果满足则将这个返回值作为一个表达式参与后续操作。一个简单的例子如下，这是我的上传文件的实现的一部分：
+
+\begin{lstlisting}[language = C++, morekeywords = { u32, nullptr }, ndkeywords = { TRY }]
+if (![=] {
+  Buffer p = get_path(connfd, arg1 >> 2 & 0xFFFF);
+  int fd = TRY(openat(dirfd, p.get(), O_RDWR | O_CREAT | O_TRUNC, 0666), > 0); // 打开文件，只有返回值 > 0时才继续操作
+  DEFER(close(fd));
+  TRY(ftruncate(fd, arg2), == 0); // 调整文件大小，检测返回值为0后丢弃之
+  ...
+  return true;
+}()) { ERRMSG("failed to put"); } // 有一个操作失败了，向用户发送错误信息
+\end{lstlisting}
+
+\end{document}
