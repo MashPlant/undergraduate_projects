@@ -111,7 +111,7 @@ struct Tomasulo {
           // count occupied function units
           for (u32 j = beg; j < end; ++j) {
             ReservationStation &r1 = rss[j];
-            cnt += r1.busy && (r1.remain_time != (u8) -1 || (r1.is_q[0] && r1.is_q[1] && r1.issue_time < r.issue_time));
+            cnt += r1.busy && (r1.remain_time != (u8) -1 || (!r1.is_q[0] && !r1.is_q[1] && r1.issue_time < r.issue_time));
           }
           // still exists an available function unit?
           if (cnt < cap) {
