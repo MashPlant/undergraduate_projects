@@ -1,0 +1,19 @@
+digraph {
+0 [label="P1, P2, P3, P4, P5"]
+0 -> 1
+1 [label="P1"]
+0 -> 2
+2 [label="P2, P3, P4, P5"]
+2 -> 3
+3 [label="P2, P3, P5"]
+3 -> 4
+4 [label="P2, P5"]
+4 -> 5
+5 [label="P2"]
+4 -> 6
+6 [label="P5"]
+3 -> 7
+7 [label="P3"]
+2 -> 8
+8 [label="P4"]
+}

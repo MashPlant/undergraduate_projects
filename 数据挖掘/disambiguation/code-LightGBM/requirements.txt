@@ -1,0 +1,6 @@
+translate==3.5.0
+nltk==3.5
+gensim==3.8.3
+lightgbm==2.3.1
+numpy
+sklearn

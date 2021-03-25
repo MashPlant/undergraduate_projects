@@ -1,0 +1,13 @@
+digraph {
+  发色 -> 年龄 [label=金色]
+  发色 -> 1 [label=红色]
+  发色 -> 2 [label=黑色]
+  年龄 -> 3 [label=儿童]
+  年龄 -> 4 [label=成年]
+  年龄 -> 5 [label=老人]
+  1 [label = 第一组]
+  2 [label = 第二组]
+  3 [label = 第二组]
+  4 [label = 第一组]
+  5 [label = 第一组]
+}

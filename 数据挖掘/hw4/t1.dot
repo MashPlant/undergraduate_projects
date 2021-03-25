@@ -1,0 +1,64 @@
+digraph {
+    node [shape=plain]
+    rankdir=LR;
+
+  fact_table [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">FactTable</td></tr>
+    <tr><td port="1" align="left">date_key</td></tr>
+    <tr><td port="2" align="left">spectator_key</td></tr>
+    <tr><td port="3" align="left">location_key</td></tr>
+    <tr><td port="4" align="left">game_key</td></tr>
+    <tr><td port="5" align="left">count</td></tr>
+    <tr><td port="6" align="left">charge</td></tr>
+  </table>>];
+
+  date [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">date</td></tr>
+    <tr><td port="1" align="left">date_key</td></tr>
+    <tr><td port="2" align="left">day</td></tr>
+    <tr><td port="3" align="left">day_of_the_week</td></tr>
+    <tr><td port="4" align="left">month</td></tr>
+    <tr><td port="5" align="left">quarter</td></tr>
+    <tr><td port="6" align="left">year</td></tr>
+  </table>>];
+
+  spectator [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">spectator</td></tr>
+    <tr><td port="1" align="left">spectator_key</td></tr>
+    <tr><td port="2" align="left">spectator_name</td></tr>
+    <tr><td port="6" align="left">spectator_type</td></tr>
+  </table>>];
+
+  location [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">location</td></tr>
+    <tr><td port="1" align="left">location_key</td></tr>
+    <tr><td port="2" align="left">street</td></tr>
+    <tr><td port="3" align="left">city</td></tr>
+    <tr><td port="4" align="left">state_or_province</td></tr>
+    <tr><td port="5" align="left">country</td></tr>
+  </table>>];
+
+  game [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">game</td></tr>
+    <tr><td port="1" align="left">game_key</td></tr>
+    <tr><td port="2" align="left">game_name</td></tr>
+    <tr><td port="3" align="left">game_type</td></tr>
+  </table>>];
+
+  measure [label=<
+  <table border="0" cellborder="1" cellspacing="0">
+    <tr><td port="0" align="left">measure</td></tr>
+  </table>>];
+
+  fact_table:1 -> date:0;
+  fact_table:2 -> spectator:0;
+  fact_table:3 -> location:0;
+  fact_table:4 -> game:0;
+  fact_table:5 -> measure:0;
+  fact_table:6 -> measure:0;
+}

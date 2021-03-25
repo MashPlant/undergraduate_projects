@@ -1,0 +1,11 @@
+两问的代码分别在t1.py和t2.py中，t1.py需要Python3.8才能运行，t2.py则没有什么特别的要求，应该正常的Python3解释器都可以。
+
+直接运行`python t[1|2].py`即可，它们期望数据文件(夹)和它们在同一个文件夹。t1.py会将结果图片都保存到文件中，t2.py会将结果图片直接展示出来。
+
+两个文件总共依赖如下的包：
+
+```
+matplotlib numpy pandas nltk wordcloud sklearn
+```
+
+还需要下载两个nltk的数据包：punkt和stopwords。
